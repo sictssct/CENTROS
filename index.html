@@ -814,7 +814,7 @@ function loadQGISMapLayers(){
     return Promise.reject(new Error('El tablero se abrió como archivo local. Publícalo en GitHub Pages o ejecútalo con un servidor local; los mapas externos no cargan con doble clic.'));
   }
   QGIS_MAP_LAYERS_PROMISE = Promise.all(Object.entries(QGIS_MAP_LAYER_FILES).map(async ([key,file])=>{
-    const assetUrl = new URL('data/'+file, document.baseURI).toString();
+    const assetUrl = new URL(file, document.baseURI).toString();
     let response;
     try { response = await fetch(assetUrl, {cache:'no-cache'}); }
     catch(fetchError) { throw new Error('No se pudo conectar con '+assetUrl+'. Verifica que el archivo esté publicado en esa ruta. '+(fetchError?.message||'')); }
