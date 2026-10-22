@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tablero de Control Centros SICT</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{
+  --guinda:#611232;
+  --guinda2:#7A1E3A;
+  --dorado:#A57F2C;
+  --verde:#002F2A;
+  --rojo:#C62828;
+  --azul:#1565C0;
+  --bg:#F4F5F7;
+  --text:#2D3035;
+  --muted:#727780;
+  --border:#E4E6EA;
+  --white:#fff;
+  --shadow:0 10px 30px rgba(30,30,30,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select{font:inherit}
+
+/* LOGIN */
+#loginScreen{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#4c0d26 0%,#611232 48%,#7A1E3A 100%);
+  padding:24px;position:relative;overflow:hidden;
+}
+#loginScreen:before,#loginScreen:after{
+  content:"";position:absolute;border:1px solid rgba(255,255,255,.09);border-radius:50%;
+}
+#loginScreen:before{width:600px;height:600px;right:-180px;top:-220px}
+#loginScreen:after{width:500px;height:500px;left:-230px;bottom:-250px}
+.login-card{
+  width:min(1050px,100%);min-height:610px;background:#fff;border-radius:22px;
+  box-shadow:0 30px 80px rgba(0,0,0,.24);display:grid;grid-template-columns:1.05fr .95fr;
+  overflow:hidden;position:relative;z-index:1;
+}
+.login-brand{
+  background:linear-gradient(150deg,var(--guinda),#4c0d26);
+  color:white;padding:60px;display:flex;flex-direction:column;justify-content:center;
+}
+.logo-lockup{display:flex;align-items:center;gap:18px;margin-bottom:34px}
+.logo-mark{width:72px;height:72px;border:2px solid rgba(255,255,255,.75);border-radius:14px;
+display:flex;align-items:center;justify-content:center;font-size:25px;font-weight:800;letter-spacing:-2px}
+.logo-name{font-size:31px;font-weight:800;letter-spacing:.5px}
+.logo-sub{font-size:13px;opacity:.75;margin-top:3px}
+.login-brand h1{font-size:37px;line-height:1.08;margin:0 0 18px}
+.login-brand p{font-size:16px;line-height:1.7;color:rgba(255,255,255,.78);max-width:520px}
+.gold-line{width:72px;height:4px;background:var(--dorado);border-radius:5px;margin:8px 0 25px}
+.login-form{padding:58px 62px;display:flex;flex-direction:column;justify-content:center}
+.login-form h2{font-size:28px;margin:0 0 7px;color:var(--guinda)}
+.login-form .hint{color:var(--muted);font-size:14px;margin:0 0 28px}
+.field{margin-bottom:17px}
+.field label{display:block;font-size:13px;font-weight:700;margin-bottom:8px}
+.field input,.field select{
+  width:100%;height:48px;border:1px solid #D8DBE0;border-radius:10px;padding:0 14px;
+  outline:none;background:#fff;transition:.2s;
+}
+.field input:focus,.field select:focus{border-color:var(--guinda);box-shadow:0 0 0 3px rgba(97,18,50,.1)}
+.login-btn{
+  height:50px;border:0;border-radius:10px;background:var(--guinda);color:#fff;font-weight:700;
+  cursor:pointer;margin-top:8px;transition:.2s
+}
+.login-btn:hover{background:#4e0d28;transform:translateY(-1px)}
+.demo{font-size:12px;color:#8A8E95;margin-top:17px;text-align:center}
+.demo strong{color:var(--guinda)}
+
+/* APP */
+#app{display:none;min-height:100vh}
+.sidebar{
+  width:260px;background:#fff;border-right:1px solid var(--border);position:fixed;left:0;top:0;bottom:0;
+  z-index:20;display:flex;flex-direction:column
+}
+.sidebar-top{height:90px;padding:20px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.sidebar-logo{width:42px;height:42px;background:var(--guinda);color:#fff;border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800}
+.sidebar-title{font-weight:800;color:var(--guinda);font-size:15px;line-height:1.1}
+.sidebar-title small{display:block;color:var(--muted);font-size:10px;font-weight:500;margin-top:3px}
+.nav{padding:20px 13px;overflow:auto}
+.nav-section{font-size:10px;font-weight:800;letter-spacing:1.1px;color:#999FA8;padding:10px 12px 8px}
+.nav button{
+  width:100%;border:0;background:transparent;text-align:left;padding:12px 13px;border-radius:9px;
+  color:#4E535B;cursor:pointer;display:flex;align-items:center;gap:12px;font-size:13px;margin:2px 0
+}
+.nav button:hover{background:#F7F2F4;color:var(--guinda)}
+.nav button.active{background:#F4EDEF;color:var(--guinda);font-weight:700}
+.nav-icon{width:22px;text-align:center;font-size:17px}
+.sidebar-bottom{margin-top:auto;padding:17px;border-top:1px solid var(--border)}
+.user-mini{display:flex;gap:10px;align-items:center}
+.avatar{width:38px;height:38px;border-radius:50%;background:var(--guinda);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+.user-mini b{font-size:12px}.user-mini span{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+
+.main{margin-left:260px;min-height:100vh}
+.topbar{
+  height:76px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;
+  justify-content:space-between;padding:0 32px;position:sticky;top:0;z-index:10
+}
+.breadcrumb{font-size:13px;color:var(--muted)}.breadcrumb strong{color:var(--guinda)}
+.top-actions{display:flex;align-items:center;gap:14px}
+.center-badge{padding:8px 13px;background:#F7F7F8;border:1px solid var(--border);border-radius:9px;font-size:12px}
+.logout{border:0;background:transparent;color:var(--guinda);font-size:12px;font-weight:700;cursor:pointer}
+
+.content{padding:30px 34px 45px;max-width:1500px;margin:auto}
+.hero{
+  background:linear-gradient(135deg,var(--guinda),var(--guinda2));color:#fff;border-radius:16px;
+  padding:29px 32px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow)
+}
+.hero h1{margin:0 0 7px;font-size:27px}.hero p{margin:0;color:rgba(255,255,255,.76);font-size:13px}
+.hero-meta{text-align:right;font-size:11px;color:rgba(255,255,255,.7)}
+.hero-meta strong{display:block;color:#fff;font-size:14px;margin-top:4px}
+
+.section-title{display:flex;justify-content:space-between;align-items:end;margin:30px 0 14px}
+.section-title h2{margin:0;font-size:18px;color:#333}.section-title span{font-size:12px;color:var(--muted)}
+
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.metric{background:#fff;border:1px solid var(--border);border-radius:13px;padding:19px;box-shadow:0 3px 12px rgba(0,0,0,.03)}
+.metric-top{display:flex;justify-content:space-between;align-items:center}.metric-label{font-size:11px;color:var(--muted);font-weight:700}
+.metric-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;background:#F4EDEF;color:var(--guinda)}
+.metric-value{font-size:27px;font-weight:800;margin-top:13px}.metric-foot{font-size:10px;color:#8A8F97;margin-top:4px}
+
+.modules{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.module{
+  background:#fff;border:1px solid var(--border);border-radius:15px;padding:23px;min-height:230px;
+  cursor:pointer;transition:.22s;position:relative;overflow:hidden
+}
+.module:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:#D8C5CD}
+.module:after{content:"";position:absolute;right:-35px;bottom:-40px;width:120px;height:120px;border-radius:50%;background:#F8F1F4}
+.module-icon{width:48px;height:48px;border-radius:12px;background:#F4EDEF;color:var(--guinda);display:flex;align-items:center;justify-content:center;font-size:23px;margin-bottom:18px}
+.module:nth-child(2) .module-icon{background:#F5F1E7;color:var(--dorado)}
+.module:nth-child(3) .module-icon{background:#EDF5F3;color:var(--verde)}
+.module:nth-child(4) .module-icon{background:#EDF3FA;color:var(--azul)}
+.module h3{margin:0 0 7px;font-size:17px}.module p{font-size:12px;color:var(--muted);line-height:1.6;margin:0 0 15px}
+.module-link{font-size:11px;font-weight:800;color:var(--guinda)}
+
+.panel{background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px;margin-top:20px}
+.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;font-size:12px}.table th{text-align:left;color:#858A92;font-size:10px;text-transform:uppercase;letter-spacing:.5px;padding:11px;border-bottom:1px solid var(--border)}.table td{padding:13px 11px;border-bottom:1px solid #F0F1F3}.table tr:last-child td{border-bottom:0}
+.status{display:inline-flex;padding:5px 8px;border-radius:99px;font-size:10px;font-weight:700}.status.ok{background:#E9F5F1;color:#14624D}.status.warn{background:#FBF2DF;color:#8A6818}
+
+.page{display:none}.page.active{display:block}
+.back-btn{border:0;background:#fff;border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--guinda);font-weight:700;cursor:pointer}
+.card-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.simple-card{background:#fff;border:1px solid var(--border);border-radius:13px;padding:20px}.simple-card h3{margin:0 0 8px;font-size:15px}.simple-card p{font-size:12px;color:var(--muted);line-height:1.5}.simple-card ul{padding-left:17px;color:#5D626A;font-size:12px;line-height:1.9}
+
+.search{height:42px;border:1px solid var(--border);border-radius:9px;padding:0 13px;width:280px;outline:none}
+.toolbar{display:flex;justify-content:space-between;gap:15px;margin-bottom:15px}
+.center-list{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+.center-item{background:#fff;border:1px solid var(--border);border-radius:12px;padding:17px;cursor:pointer}.center-item:hover{border-color:#D6B7C4;box-shadow:var(--shadow)}.center-item b{font-size:13px}.center-item span{display:block;color:var(--muted);font-size:10px;margin-top:5px}
+
+@media(max-width:1050px){
+  .modules{grid-template-columns:repeat(2,1fr)}.metrics{grid-template-columns:repeat(2,1fr)}
+  .center-list{grid-template-columns:repeat(2,1fr)}.card-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:760px){
+  .sidebar{width:70px}.sidebar-title,.nav-section,.nav button span:not(.nav-icon),.user-mini div:not(.avatar){display:none}
+  .sidebar-top{justify-content:center;padding:15px}.nav button{justify-content:center;padding:13px}.sidebar-bottom{display:flex;justify-content:center;padding:12px}
+  .main{margin-left:70px}.topbar{padding:0 17px}.center-badge{display:none}.content{padding:20px 15px}
+  .hero{padding:23px;display:block}.hero-meta{text-align:left;margin-top:15px}.modules,.metrics,.center-list,.card-grid{grid-template-columns:1fr}
+  .login-card{grid-template-columns:1fr}.login-brand{display:none}.login-form{padding:42px 28px}
+}
+
+/* V2 — carpetas normativas y presupuesto */
+.folder-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.folder-card{
+  background:#fff;border:1px solid var(--border);border-radius:13px;padding:21px;
+  cursor:pointer;transition:.2s;position:relative;min-height:155px;
+}
+.folder-card:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:#D6B7C4}
+.folder-top{display:flex;align-items:center;gap:12px;margin-bottom:15px}
+.folder-icon{font-size:30px;line-height:1;color:var(--dorado)}
+.folder-card h3{font-size:15px;margin:0;color:#30343A}
+.folder-card p{font-size:11px;color:var(--muted);line-height:1.5;margin:0}
+.folder-count{position:absolute;right:17px;bottom:15px;font-size:10px;color:#969BA3}
+.folder-arrow{position:absolute;right:17px;top:17px;color:var(--guinda);font-weight:800}
+.empty-state{
+  min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;color:var(--muted)
+}
+.empty-folder{width:70px;height:55px;border-radius:10px;background:#F5F1E7;display:flex;align-items:center;justify-content:center;font-size:31px;margin-bottom:15px;color:var(--dorado)}
+.empty-state h3{margin:0 0 7px;color:#444;font-size:17px}.empty-state p{margin:0;font-size:12px;max-width:430px;line-height:1.6}
+.folder-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+.path{font-size:12px;color:var(--muted)}.path strong{color:var(--guinda)}
+.chart-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:18px}
+.chart-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px;min-height:330px}
+.chart-card.wide{grid-column:1/-1}
+.chart-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:15px}
+.chart-head h3{margin:0;font-size:14px}.chart-head span{font-size:10px;color:var(--muted)}
+.chart-box{position:relative;height:245px}
+.progress-wrap{margin-top:12px}.progress-label{display:flex;justify-content:space-between;font-size:11px;margin-bottom:7px;color:#555}
+.progress-bar{height:10px;background:#ECEDEF;border-radius:99px;overflow:hidden}.progress-fill{height:100%;background:var(--guinda);border-radius:99px}
+.finance-filters{display:flex;gap:10px;flex-wrap:wrap}
+.finance-select{height:38px;border:1px solid var(--border);background:#fff;border-radius:8px;padding:0 10px;font-size:11px}
+@media(max-width:1050px){.folder-grid{grid-template-columns:repeat(2,1fr)}.chart-grid{grid-template-columns:1fr}.chart-card.wide{grid-column:auto}}
+@media(max-width:760px){.folder-grid{grid-template-columns:1fr}.folder-toolbar{display:block}.finance-filters{margin-top:12px}}
+
+
+.heat-legend{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-top:12px;padding:12px;border:1px solid #e2e5e9;border-radius:10px;background:#fff;font-size:12px;color:#45505c}
+.heat-legend strong{flex-basis:100%;font-size:13px;color:#26313d}
+.heat-legend span{display:inline-flex;align-items:center;gap:6px}
+.heat-legend span i{display:inline-block;width:16px;height:16px;border:1px solid #d6d6d6;border-radius:3px}
+.heat-legend small{flex-basis:100%;color:#667085;line-height:1.4}
+.interactive-map{min-height:480px;width:100%;background:#f3f5f7}
+
+
+.leaflet-container{background:#f4f6f5!important;font-family:inherit}
+.heat-legend-map{background:rgba(255,255,255,.96);padding:10px 12px;border:1px solid #d9dee3;border-radius:9px;box-shadow:0 2px 10px #1f29371a;color:#334155;font-size:11px;line-height:1.55}
+.heat-legend-map strong{display:block;font-size:12px;margin-bottom:5px;color:#611232}
+.heat-legend-map div{white-space:nowrap}
+.heat-legend-map i{display:inline-block;width:13px;height:13px;vertical-align:middle;margin-right:5px;border:1px solid #ddd;border-radius:2px}
+.heat-legend-map small{display:block;max-width:210px;color:#64748b;white-space:normal;margin-top:5px}
+
+
+.airport-aircraft-marker{background:transparent;border:0}
+.airport-plane-icon{color:#A57F2C;font-size:17px;font-weight:400;line-height:18px;text-align:center;text-shadow:-1px -1px 0 #fff,1px -1px 0 #fff,-1px 1px 0 #fff,1px 1px 0 #fff;transform:rotate(-90deg);transform-origin:center}
+.airport-iata-label{font-size:8px;font-weight:400;color:#111111;text-align:center;white-space:nowrap;line-height:10px;text-shadow:-1px -1px 0 #fff,1px -1px 0 #fff,-1px 1px 0 #fff,1px 1px 0 #fff}
+.module-finance-panel{margin-top:16px}
+.finance-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}
+.module-note{font-size:12px;color:#667085;margin:10px 0 0}
+@media(max-width:700px){.finance-metrics{grid-template-columns:1fr}}
+
+
+.leaflet-container{background:#dcebf0!important}
+.leaflet-popup-content-wrapper{border:1px solid #2f5d87;border-radius:8px;box-shadow:0 2px 8px #0002}
+
+
+.legend-aircraft{display:inline-block;color:#A57F2C;font-size:15px;line-height:1;vertical-align:-1px;margin-right:3px;font-weight:400}
+
+</style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+.interactive-map{width:100%;height:520px;border:1px solid var(--line,#d8dde5);border-radius:12px;overflow:hidden;background:#eef1f4;z-index:1}
+.map-note{font-size:12px;color:var(--muted);line-height:1.6;margin:0 0 12px}
+.map-legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:11px;color:var(--muted)}
+.map-legend span{display:flex;align-items:center;gap:6px}
+.legend-line{display:inline-block;width:24px;height:0;border-top:3px solid}
+.road-line{border-color:#7b1e2b}.domestic-line{border-color:#1565c0}.international-line{border-color:#a57f2c;border-top-style:dashed}
+.legend-dot{display:inline-block;width:9px;height:9px;border-radius:50%}
+.tdpa-dot{background:#d97706}.airport-dot{background:#002f2a}
+.legend-patch{display:inline-block;width:12px;height:12px;background:#a57f2c;border:1px solid #7b1e2b;border-radius:2px}
+@media(max-width:700px){.interactive-map{height:400px}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<section id="loginScreen">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="logo-lockup">
+        <div class="logo-mark">SICT</div>
+        <div><div class="logo-name">SICT</div><div class="logo-sub">Gobierno de México</div></div>
+      </div>
+      <div class="gold-line"></div>
+      <h1>Tablero de Control Centros SICT</h1>
+      <p>Acceso centralizado a normativa, información de los Centros SICT, presupuesto y estudios para apoyar la gestión y consulta institucional.</p>
+    </div>
+    <div class="login-form">
+      <h2>Iniciar sesión</h2>
+      <p class="hint">Tablero de Control Centros SICT.</p>
+      <div class="field">
+        <label>Centro SICT</label>
+        <select id="centro">
+          <option value="">Seleccione un Centro SICT</option>
+          <option>Aguascalientes</option><option>Baja California</option><option>Baja California Sur</option>
+          <option>Campeche</option><option>Chiapas</option><option>Chihuahua</option><option>Ciudad de México</option>
+          <option>Coahuila</option><option>Colima</option><option>Durango</option><option>Guanajuato</option>
+          <option>Guerrero</option><option>Hidalgo</option><option>Jalisco</option><option>México</option>
+          <option>Michoacán</option><option>Morelos</option><option>Nayarit</option><option>Nuevo León</option>
+          <option>Oaxaca</option><option>Puebla</option><option>Querétaro</option><option>Quintana Roo</option>
+          <option>San Luis Potosí</option><option>Sinaloa</option><option>Sonora</option><option>Tabasco</option>
+          <option>Tamaulipas</option><option>Tlaxcala</option><option>Veracruz</option><option>Yucatán</option><option>Zacatecas</option>
+        </select>
+      </div>
+      <div class="field"><label>Correo institucional</label><input id="correo" type="email" placeholder="usuario@sict.gob.mx"></div>
+      <div class="field"><label>Contraseña</label><input id="password" type="password" placeholder="••••••••"></div>
+      <button class="login-btn" onclick="login()">Ingresar a la plataforma</button>
+      <div class="demo">Modo prototipo · Acceso simulado: <strong>cualquier correo y contraseña</strong></div>
+    </div>
+  </div>
+</section>
+
+<!-- APP -->
+<div id="app">
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <div class="sidebar-logo">SICT</div>
+      <div class="sidebar-title">Tablero de Control<small>Centros SICT</small></div>
+    </div>
+    <nav class="nav">
+      <div class="nav-section">PRINCIPAL</div>
+      <button class="active" onclick="showPage('inicio',this)"><span class="nav-icon">⌂</span><span>Inicio</span></button>
+      <button onclick="showPage('normativa',this)"><span class="nav-icon">▤</span><span>Normativa</span></button>
+      <button onclick="showPage('centros',this)"><span class="nav-icon">▦</span><span>Centros SICT</span></button>
+      <button onclick="showPage('presupuesto',this)"><span class="nav-icon">$</span><span>Presupuesto</span></button>
+      <button onclick="showPage('estudios',this)"><span class="nav-icon">◫</span><span>Estudios</span></button>
+      <div class="nav-section">SISTEMA</div>
+      <button onclick="alert('Módulo reservado para la siguiente versión.')"><span class="nav-icon">⚙</span><span>Configuración</span></button>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-mini"><div class="avatar">US</div><div><b>Usuario SICT</b><span id="miniCentro">Centro SICT</span></div></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="breadcrumb">Plataforma / <strong id="crumb">Inicio</strong></div>
+      <div class="top-actions"><div class="center-badge">Centro: <b id="topCentro">—</b></div><button class="logout" onclick="logout()">Cerrar sesión</button></div>
+    </header>
+
+    <div class="content">
+      <!-- INICIO -->
+      <section id="page-inicio" class="page active">
+        <div class="hero">
+          <div><h1>Panel general</h1><p>Consulta y administración de información de los Centros SICT.</p></div>
+          <div class="hero-meta">ÚLTIMA ACTUALIZACIÓN<strong>09 de septiembre de 2026</strong></div>
+        </div>
+
+        <div class="section-title"><h2>Resumen nacional</h2><span>Información de referencia · Datos simulados</span></div>
+        <div class="metrics">
+          <div class="metric"><div class="metric-top"><span class="metric-label">CENTROS SICT</span><span class="metric-icon">▦</span></div><div class="metric-value">31</div><div class="metric-foot">Centros registrados</div></div>
+          <div class="metric"><div class="metric-top"><span class="metric-label">DOCUMENTOS NORMATIVOS</span><span class="metric-icon">▤</span></div><div class="metric-value">248</div><div class="metric-foot">Documentos disponibles</div></div>
+          <div class="metric"><div class="metric-top"><span class="metric-label">INVERSIÓN</span><span class="metric-icon">$</span></div><div class="metric-value">$18.4 B</div><div class="metric-foot">Dato simulado · ejercicio 2026</div></div>
+          <div class="metric"><div class="metric-top"><span class="metric-label">RED CARRETERA</span><span class="metric-icon">⌁</span></div><div class="metric-value">65,763 km</div><div class="metric-foot">Con 121,712 tramos · Serie oficial 2024</div></div>
+        </div>
+
+        <div class="section-title"><h2>Módulos de la plataforma</h2><span>Seleccione un módulo para continuar</span></div>
+        <div class="modules">
+          <div class="module" onclick="showPage('normativa')"><div class="module-icon">▤</div><h3>Normativa</h3><p>Consulta organizada del marco normativo, manuales, directrices, procedimientos y NOM's.</p><div class="module-link">Explorar normativa →</div></div>
+          <div class="module" onclick="showPage('centros')"><div class="module-icon">▦</div><h3>Centros SICT</h3><p>Consulta integral de los 31 Centros SICT y sus áreas de Autotransporte, Medicina Preventiva e Infraestructura.</p><div class="module-link">Consultar centros →</div></div>
+          <div class="module" onclick="showPage('presupuesto')"><div class="module-icon">$</div><h3>Presupuesto</h3><p>Visualización agregada de costos, inversión, flujo de efectivo y balance general.</p><div class="module-link">Ver presupuesto →</div></div>
+          <div class="module" onclick="showPage('estudios')"><div class="module-icon">◫</div><h3>Estudios</h3><p>Información territorial y de planeación: red, habitantes y superficie en km².</p><div class="module-link">Consultar estudios →</div></div>
+          
+        </div>
+
+        <div class="panel">
+          <div class="section-title" style="margin:0 0 8px"><h2>Estado de información</h2><span>Prototipo</span></div>
+          <div class="table-wrap"><table class="table">
+            <thead><tr><th>Módulo</th><th>Registros / documentos</th><th>Última actualización</th><th>Estado</th></tr></thead>
+            <tbody>
+              <tr><td>Normativa</td><td>248 documentos</td><td>09/09/2026</td><td><span class="status ok">Disponible</span></td></tr>
+              <tr><td>Centros SICT</td><td>31 centros</td><td>09/09/2026</td><td><span class="status ok">Disponible</span></td></tr>
+              <tr><td>Presupuesto</td><td>Datos simulados</td><td>09/09/2026</td><td><span class="status warn">Prototipo</span></td></tr>
+              <tr><td>Estudios</td><td>Datos simulados</td><td>09/09/2026</td><td><span class="status warn">Prototipo</span></td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- NORMATIVA -->
+      <section id="page-normativa" class="page">
+        <div class="hero"><div><h1>Normativa</h1><p>Repositorio documental institucional.</p></div><div class="hero-meta">CARPETAS<strong>5</strong></div></div>
+        <div id="normFolderView">
+          <div class="section-title"><h2>Archivo normativo</h2><span>Seleccione una carpeta para consultar su contenido</span></div>
+          <div class="folder-grid">
+            <div class="folder-card" onclick="openFolder('Reglamento Interior')"><span class="folder-arrow">→</span><div class="folder-top"><div class="folder-icon">📁</div><h3>Reglamento Interior</h3></div><p>Marco orgánico y administrativo de la Secretaría.</p><div class="folder-count">0 documentos · carpeta disponible</div></div>
+            <div class="folder-card" onclick="openFolder('Directrices')"><span class="folder-arrow">→</span><div class="folder-top"><div class="folder-icon">📁</div><h3>Directrices</h3></div><p>Directrices institucionales y sectoriales.</p><div class="folder-count">0 documentos · carpeta disponible</div></div>
+            <div class="folder-card" onclick="openFolder('Manuales')"><span class="folder-arrow">→</span><div class="folder-top"><div class="folder-icon">📁</div><h3>Manuales</h3></div><p>Manuales de organización, operación y procedimientos.</p><div class="folder-count">0 documentos · carpeta disponible</div></div>
+            <div class="folder-card" onclick="openFolder('Procedimientos')"><span class="folder-arrow">→</span><div class="folder-top"><div class="folder-icon">📁</div><h3>Procedimientos</h3></div><p>Procedimientos administrativos y operativos.</p><div class="folder-count">0 documentos · carpeta disponible</div></div>
+            <div class="folder-card" onclick="openFolder('NOM´s')"><span class="folder-arrow">→</span><div class="folder-top"><div class="folder-icon">📁</div><h3>NOM's</h3></div><p>Normas Oficiales Mexicanas relacionadas con el sector.</p><div class="folder-count">0 documentos · carpeta disponible</div></div>
+          </div>
+          <div class="panel">
+            <div class="section-title" style="margin:0 0 8px"><h2>Repositorio</h2><span>Preparado para carga documental</span></div>
+            <p style="font-size:12px;color:var(--muted);margin:0">Las carpetas pueden permanecer vacías por ahora. Posteriormente podremos agregar carga de PDF, fecha, versión, área responsable y control documental.</p>
+          </div>
+        </div>
+
+        <div id="normFolderContent" style="display:none">
+          <div class="folder-toolbar">
+            <button class="back-btn" onclick="closeFolder()">← Regresar a carpetas</button>
+            <div class="path">Normativa / <strong id="folderName">Carpeta</strong></div>
+          </div>
+          <div class="panel" style="margin-top:0">
+            <div class="empty-state">
+              <div class="empty-folder">📁</div>
+              <h3 id="emptyTitle">Carpeta vacía</h3>
+              <p>Esta carpeta está disponible para incorporar documentos. Por el momento no contiene archivos.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CENTROS -->
+      <section id="page-centros" class="page">
+        <div class="hero"><div><h1>Centros SICT</h1><p>Directorio nacional de los 31 Centros SICT.</p></div><div class="hero-meta">CENTROS REGISTRADOS<strong>31</strong></div></div>
+        <div class="section-title"><h2>Directorio</h2><span>Seleccione un Centro para consultar su información</span></div>
+        <div class="toolbar"><input class="search" placeholder="Buscar Centro SICT..." oninput="filterCenters(this.value)"></div>
+        <div id="centerList" class="center-list"></div>
+      </section>
+
+      <!-- CENTRO DETALLE -->
+      <section id="page-centro-detalle" class="page">
+        <button class="back-btn" onclick="showPage('centros')">← Regresar a Centros</button>
+        <div class="section-title"><h2 id="detailTitle">Centro SICT</h2><span>Información simulada</span></div>
+        <div class="card-grid">
+          <div class="simple-card" style="cursor:pointer" onclick="openArea('autotransporte')">
+            <h3>🚛 Autotransporte Federal</h3>
+            <ul>
+              <li>Presupuesto</li><li>Accidentes</li><li>Permisionarios</li>
+              <li>Depósitos vehiculares</li><li>Roles</li><li>Flota y modalidades</li>
+              <li>Trámites</li><li>Permisos</li>
+            </ul>
+            <p style="font-size:11px;color:var(--guinda);font-weight:700;margin-bottom:0">Abrir autotransporte →</p>
+          </div>
+          <div class="simple-card" style="cursor:pointer" onclick="openArea('medicina')">
+            <h3>⚕ Medicina Preventiva</h3>
+            <ul><li>Presupuesto</li><li>EPIS · cantidad y monto</li><li>EMOS · cantidad y monto</li></ul>
+            <p style="font-size:11px;color:var(--guinda);font-weight:700;margin-bottom:0">Abrir medicina preventiva →</p>
+          </div>
+          <div class="simple-card" style="cursor:pointer" onclick="openInfraestructura()">
+            <h3>▰ Infraestructura</h3>
+            <ul>
+              <li>Presupuesto</li><li>Contratos</li><li>KM de red</li><li>Proyección</li>
+              <li>Costos unitarios</li><li>Proveedores</li><li>Georreferencia</li>
+              <li>Tramos y clasificación de la red</li><li>Aforos y TDPA</li>
+              <li>Cobertura y calidad de datos</li>
+            </ul>
+            <p style="font-size:11px;color:var(--guinda);font-weight:700;margin-bottom:0">Abrir infraestructura →</p>
+          </div>
+          <div class="simple-card" style="cursor:pointer" onclick="openAeronautica()">
+            <h3>✈ Aeronáutica</h3>
+            <ul>
+              <li>Inversión</li><li>Aeropuertos y aerolíneas</li><li>Vuelos de origen y destino</li>
+              <li>Pasajeros y carga</li><li>Rutas nacionales e internacionales</li>
+              <li>Conectividad e indicadores por población</li><li>Mapas aeronáuticos</li>
+            </ul>
+            <p style="font-size:11px;color:var(--guinda);font-weight:700;margin-bottom:0">Abrir aeronáutica →</p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- AUTOTRANSPORTE DETALLE -->
+      <section id="page-autotransporte" class="page">
+        <button class="back-btn" onclick="showPage('centro-detalle')">← Regresar a áreas del Centro</button>
+        <div class="hero" style="margin-top:18px"><div><h1>Autotransporte Federal</h1><p>Seguimiento operativo, administrativo y de seguridad del autotransporte federal.</p></div><div class="hero-meta">CENTRO SICT<strong id="autoCentroTitle">—</strong></div></div>
+        <div class="section-title"><h2>Indicadores de autotransporte</h2><span>Datos por entidad · red 2025 y aforos 2024</span></div>
+        <div class="metrics">
+          <div class="metric"><div class="metric-label">ACCIDENTES</div><div class="metric-value">—</div><div class="metric-foot">Registros del periodo seleccionado</div></div>
+          <div class="metric"><div class="metric-label">PERMISIONARIOS</div><div class="metric-value">—</div><div class="metric-foot">Por modalidad y entidad</div></div>
+          <div class="metric"><div class="metric-label">FLOTA REGISTRADA</div><div class="metric-value">—</div><div class="metric-foot">Vehículos por modalidad</div></div>
+          <div class="metric"><div class="metric-label">TRÁMITES Y PERMISOS</div><div class="metric-value">—</div><div class="metric-foot">Volumen y estatus de atención</div></div>
+        </div>
+        <div class="card-grid" style="margin-top:16px">
+          <div class="simple-card"><h3>Presupuesto</h3><ul><li>Presupuesto aprobado</li><li>Presupuesto ejercido</li><li>Avance presupuestal</li><li>Comparación por periodo</li></ul></div>
+          <div class="simple-card"><h3>Accidentes</h3><ul><li>Número de accidentes</li><li>Evolución temporal</li><li>Distribución por tipo y ubicación</li><li>Indicadores de seguridad cuando exista exposición vehicular</li></ul></div>
+          <div class="simple-card"><h3>Permisionarios, flota y modalidades</h3><ul><li>Permisionarios por modalidad</li><li>Flota registrada</li><li>Roles y depósitos vehiculares</li><li>Distribución y cambios en el tiempo</li></ul></div>
+          <div class="simple-card"><h3>Trámites y permisos</h3><ul><li>Solicitudes recibidas</li><li>Trámites concluidos y pendientes</li><li>Tiempo de resolución, si está disponible</li><li>Rezago y carga de trabajo</li></ul></div>
+        </div>
+        <div class="panel"><div class="section-title" style="margin:0 0 8px"><h2>Calidad y cobertura</h2><span>Control de datos</span></div><p style="font-size:12px;line-height:1.6;color:var(--muted)">Cada indicador deberá mostrar periodo, fuente, unidad, cobertura y fecha de actualización. Los valores se mantendrán como guiones hasta conectar la fuente correspondiente; no se mostrarán cifras simuladas como reales.</p></div>
+      </section>
+
+      <!-- MEDICINA PREVENTIVA DETALLE -->
+      <section id="page-medicina" class="page">
+        <button class="back-btn" onclick="showPage('centro-detalle')">← Regresar a áreas del Centro</button>
+        <div class="hero" style="margin-top:18px"><div><h1>Medicina Preventiva</h1><p>Seguimiento de presupuesto, EPIS y EMOS por Centro SICT.</p></div><div class="hero-meta">CENTRO SICT<strong id="medCentroTitle">—</strong></div></div>
+        <div class="section-title"><h2>Indicadores de Medicina Preventiva</h2><span>Datos por entidad · red 2025 y aforos 2024</span></div>
+        <div class="metrics">
+          <div class="metric"><div class="metric-label">PRESUPUESTO EJERCIDO</div><div class="metric-value">—</div><div class="metric-foot">Monto y avance del periodo</div></div>
+          <div class="metric"><div class="metric-label">EPIS</div><div class="metric-value">—</div><div class="metric-foot">Cantidad y monto</div></div>
+          <div class="metric"><div class="metric-label">EMOS</div><div class="metric-value">—</div><div class="metric-foot">Cantidad y monto</div></div>
+          <div class="metric"><div class="metric-label">ACTIVIDAD REGISTRADA</div><div class="metric-value">—</div><div class="metric-foot">Según cobertura de los registros</div></div>
+        </div>
+        <div class="card-grid" style="margin-top:16px">
+          <div class="simple-card"><h3>Presupuesto</h3><ul><li>Aprobado y ejercido</li><li>Avance presupuestal</li><li>Disponible por ejercer</li><li>Evolución por periodo</li></ul></div>
+          <div class="simple-card"><h3>EPIS</h3><ul><li>Cantidad registrada</li><li>Monto asociado</li><li>Distribución temporal</li><li>Comparación entre Centros</li></ul></div>
+          <div class="simple-card"><h3>EMOS</h3><ul><li>Cantidad registrada</li><li>Monto asociado</li><li>Distribución temporal</li><li>Comparación entre Centros</li></ul></div>
+          <div class="simple-card"><h3>Seguimiento y calidad</h3><ul><li>Periodo y fecha de actualización</li><li>Registros faltantes</li><li>Consistencia entre cantidad y monto</li><li>Alertas solo con reglas documentadas</li></ul></div>
+        </div>
+        <div class="panel"><div class="section-title" style="margin:0 0 8px"><h2>Calidad y cobertura</h2><span>Control de datos</span></div><p style="font-size:12px;line-height:1.6;color:var(--muted)">EPIS y EMOS se conservarán como categorías originales. Sus definiciones, unidades y reglas de agregación deberán confirmarse con las bases institucionales antes de calcular indicadores o comparar Centros.</p></div>
+      </section>
+
+      <!-- INFRAESTRUCTURA DETALLE -->
+      <section id="page-infraestructura" class="page">
+        <button class="back-btn" onclick="showPage('centro-detalle')">← Regresar a áreas del Centro</button>
+        <div class="hero" style="margin-top:18px"><div><h1>Infraestructura</h1><p>Red carretera, tramos, aforos, inversión y georreferencia.</p></div><div class="hero-meta">CENTRO SICT<strong id="infraCentroTitle">—</strong></div></div>
+        <div class="section-title"><h2>Infraestructura carretera · indicadores</h2><span>Red y tramos · 2025 · TDPA 2024</span></div>
+        <div class="metrics">
+          <div class="metric"><div class="metric-label">PARTICIPACIÓN EN LA RED FEDERAL NACIONAL</div><div class="metric-value" id="infraPctKm">—</div><div class="metric-foot"><strong id="infraKm">—</strong> km de red federal en el estado · 2025</div></div>
+          <div class="metric">
+            <div class="metric-label">LONGITUD MEDIA POR TRAMO</div>
+            <div class="metric-value" id="infraKmTramo">—</div>
+            <div class="metric-foot"><strong id="infraTramos">—</strong> tramos registrados en el estado · 2025</div>
+            <div class="metric-foot"><strong id="infraPctTramos">—</strong> del total nacional de tramos</div>
+          </div>
+          <div class="metric"><div class="metric-label">POBLACIÓN POR KM DE RED</div><div class="metric-value" id="infraHabPorKm">—</div><div class="metric-foot">Habitantes por km de red federal, calculado con la población del propio estado</div></div>
+          <div class="metric"><div class="metric-label">TDPA PROMEDIO</div><div class="metric-value" id="infraTdpa">—</div><div class="metric-foot">Promedio de aforos con TDPA · 2024</div></div>
+        </div>
+        <div class="panel map-panel">
+          <div class="section-title" style="margin:0 0 8px"><h2>Mapa de infraestructura carretera</h2><span>Capas geográficas QGIS integradas</span></div>
+          <p class="map-note">Red vial relacionada con aforos y puntos de TDPA. La red dibujada corresponde a los tramos vinculados a la base de aforos, no a una representación exhaustiva de cada carretera federal.</p>
+          <div id="infraMap" class="interactive-map" role="application" aria-label="Mapa interactivo de infraestructura carretera"></div>
+          <div class="map-legend"><span><i class="legend-line road-line"></i> Tramos relacionados con aforos</span><span><i class="legend-dot tdpa-dot"></i> Puntos de TDPA</span></div>
+          <div class="heat-legend" aria-label="Leyenda del mapa de calor de kilómetros de red federal">
+            <strong>Mapa de calor · kilómetros de red federal por estado</strong>
+            <span><i style="background:#fff1c7"></i> Menor longitud registrada</span>
+            <span><i style="background:#f6d58b"></i> Longitud baja</span>
+            <span><i style="background:#d9a441"></i> Longitud media</span>
+            <span><i style="background:#a96c26"></i> Longitud alta</span>
+            <span><i style="background:#611232"></i> Mayor longitud registrada</span>
+            <small>Los colores comparan la longitud total de red federal registrada por entidad; no representan calidad ni condición de la carretera.</small>
+          </div>
+        </div>
+      </section>
+
+      <!-- AERONAUTICA -->
+      <section id="page-aeronautica" class="page">
+        <button class="back-btn" onclick="showPage('centro-detalle')">← Regresar a áreas del Centro</button>
+        <div class="hero" style="margin-top:18px"><div><h1>Aeronáutica</h1><p>Información de infraestructura, operación y conectividad aérea por entidad federativa.</p></div><div class="hero-meta">CENTRO SICT<strong id="aeroCentroTitle">—</strong><span style="display:block;margin-top:5px">Datos de operación · 2025</span></div></div>
+        <div class="section-title"><h2>Resumen nacional</h2><span>Datos por entidad · SACE 2025</span></div>
+        <div class="metrics">
+          <div class="metric"><div class="metric-label">AEROPUERTOS</div><div class="metric-value" id="aeroAeropuertos">—</div><div class="metric-foot">Aeropuertos identificados por estado</div></div>
+          <div class="metric"><div class="metric-label">PASAJEROS</div><div class="metric-value" id="aeroPasajerosO">—</div><div class="metric-foot">Pasajeros de origen · 2025</div></div>
+          <div class="metric"><div class="metric-label">VUELOS</div><div class="metric-value" id="aeroVuelosO">—</div><div class="metric-foot">Vuelos de origen · 2025</div></div>
+          <div class="metric"><div class="metric-label">CARGA AÉREA</div><div class="metric-value" id="aeroCargaO">—</div><div class="metric-foot">Carga de origen en kg · 2025</div></div>
+        </div>
+        
+        <div class="metrics" style="margin-top:12px">
+          <div class="metric"><div class="metric-label">PASAJEROS DESTINO</div><div class="metric-value" id="aeroPasajerosD">—</div><div class="metric-foot">Llegadas registradas · 2025</div></div>
+          <div class="metric"><div class="metric-label">VUELOS DESTINO</div><div class="metric-value" id="aeroVuelosD">—</div><div class="metric-foot">Llegadas registradas · 2025</div></div>
+          <div class="metric"><div class="metric-label">RUTAS ORIGEN</div><div class="metric-value" id="aeroRutasO">—</div><div class="metric-foot">Conteo SACE · validar unicidad</div></div>
+          <div class="metric"><div class="metric-label">AEROLÍNEAS</div><div class="metric-value" id="aeroAerolineas">—</div><div class="metric-foot">Identificadas en la base 2025</div></div>
+        </div>
+<div class="card-grid" style="margin-top:16px">
+          <div class="simple-card"><h3>Operación</h3><p>Vuelos, pasajeros y carga de origen y destino, reportados por separado para transparentar diferencias de cobertura.</p></div>
+          <div class="simple-card"><h3>Conectividad</h3><p>Rutas y aerolíneas por entidad, con reglas de conteo documentadas para distinguir rutas únicas de operaciones.</p></div>
+          <div class="simple-card"><h3>Diagnóstico</h3><p>Indicadores relativos, evolución anual y señales de concentración, acompañadas por calidad y cobertura del dato.</p></div>
+        </div>
+        <div class="panel map-panel"><div class="section-title" style="margin:0 0 8px"><h2>Mapa de aeropuertos y conectividad aérea</h2><span>Capas QGIS integradas · aeropuertos 2025 y rutas</span></div><p class="map-note">Selecciona las capas para consultar aeropuertos nacionales, rutas nacionales e internacionales. Las rutas internacionales se representan usando las coordenadas disponibles en la base.</p><div id="aeroMap" class="interactive-map" role="application" aria-label="Mapa interactivo de aeropuertos y rutas aéreas"></div><div class="map-legend"><span><i class="legend-line domestic-line"></i> Rutas nacionales</span><span><i class="legend-line international-line"></i> Rutas internacionales</span><span><span class="legend-aircraft">✈</span> Aeropuertos nacionales</span></div></div>
+      </section>
+
+      <!-- PRESUPUESTO -->
+      <section id="page-presupuesto" class="page">
+        <div class="hero">
+          <div><h1>Presupuesto agregado</h1><p>Vista nacional consolidada de la información financiera.</p></div>
+          <div class="hero-meta">EJERCICIO<strong>2026</strong></div>
+        </div>
+
+        <div class="section-title">
+          <h2>Resumen financiero</h2>
+          <div class="finance-filters">
+            <select class="finance-select"><option>Ejercicio 2026</option><option>Ejercicio 2025</option></select>
+            <select class="finance-select"><option>Nacional</option><option>Aguascalientes</option><option>Jalisco</option><option>Nuevo León</option></select>
+          </div>
+        </div>
+
+        <div class="metrics">
+          <div class="metric"><div class="metric-top"><span class="metric-label">PRESUPUESTO APROBADO</span><span class="metric-icon">$</span></div><div class="metric-value">$28.6 M</div><div class="metric-foot">Presupuesto anual simulado</div></div>
+          <div class="metric"><div class="metric-top"><span class="metric-label">PRESUPUESTO EJERCIDO</span><span class="metric-icon">✓</span></div><div class="metric-value">$17.2 M</div><div class="metric-foot">Acumulado al periodo</div></div>
+          <div class="metric"><div class="metric-top"><span class="metric-label">AVANCE PRESUPUESTAL</span><span class="metric-icon">↗</span></div><div class="metric-value">60.1%</div><div class="metric-foot">Ejercido / aprobado</div></div>
+          <div class="metric"><div class="metric-top"><span class="metric-label">DISPONIBLE</span><span class="metric-icon">◌</span></div><div class="metric-value">$11.4 M</div><div class="metric-foot">Saldo por ejercer</div></div>
+        </div>
+
+        <div class="section-title"><h2>Comportamiento presupuestal</h2><span>Datos simulados · ejercicio 2026</span></div>
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-head"><h3>Aprobado vs. ejercido por rubro</h3><span>Millones de pesos</span></div>
+            <div class="chart-box"><canvas id="budgetBar"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-head"><h3>Distribución del presupuesto</h3><span>Presupuesto aprobado</span></div>
+            <div class="chart-box"><canvas id="budgetDoughnut"></canvas></div>
+          </div>
+          <div class="chart-card wide">
+            <div class="chart-head"><h3>Avance mensual del presupuesto</h3><span>Acumulado · % ejercido</span></div>
+            <div class="chart-box"><canvas id="budgetLine"></canvas></div>
+          </div>
+        </div>
+
+        <div class="section-title"><h2>Indicadores de seguimiento</h2><span>Referencia nacional</span></div>
+        <div class="panel module-finance-panel" id="infraBudgetPanel">
+          <div class="section-title"><h2>Presupuesto de infraestructura</h2><span>Disponible al integrar la base presupuestal</span></div>
+          <div class="metrics finance-metrics">
+            <div class="metric"><div class="metric-label">PRESUPUESTO AUTORIZADO</div><div class="metric-value">—</div><div class="metric-foot">Importe del ejercicio fiscal</div></div>
+            <div class="metric"><div class="metric-label">PRESUPUESTO EJERCIDO</div><div class="metric-value">—</div><div class="metric-foot">Importe acumulado ejercido</div></div>
+            <div class="metric"><div class="metric-label">AVANCE PRESUPUESTAL</div><div class="metric-value">—</div><div class="metric-foot">Ejercido / autorizado</div></div>
+          </div>
+          <p class="module-note">Los importes se mostrarán por Centro SICT cuando se conecte la base presupuestal validada.</p>
+        </div>
+        <div class="panel module-finance-panel" id="aeroInvestmentPanel">
+          <div class="section-title"><h2>Inversión aeronáutica</h2><span>Disponible al integrar la base de inversión</span></div>
+          <div class="metrics finance-metrics">
+            <div class="metric"><div class="metric-label">INVERSIÓN PROGRAMADA</div><div class="metric-value">—</div><div class="metric-foot">Importe programado del ejercicio</div></div>
+            <div class="metric"><div class="metric-label">INVERSIÓN EJERCIDA</div><div class="metric-value">—</div><div class="metric-foot">Importe acumulado ejercido</div></div>
+            <div class="metric"><div class="metric-label">AVANCE DE INVERSIÓN</div><div class="metric-value">—</div><div class="metric-foot">Ejercido / programado</div></div>
+          </div>
+          <p class="module-note">Los importes se mostrarán por Centro SICT cuando se conecte la base de inversión aeronáutica.</p>
+        </div>
+        <div class="panel">
+          <div class="progress-wrap"><div class="progress-label"><span>Avance del presupuesto aprobado</span><strong>60.1%</strong></div><div class="progress-bar"><div class="progress-fill" style="width:60.1%"></div></div></div>
+          <div class="progress-wrap"><div class="progress-label"><span>Avance de inversión</span><strong>54.8%</strong></div><div class="progress-bar"><div class="progress-fill" style="width:54.8%"></div></div></div>
+          <div class="progress-wrap"><div class="progress-label"><span>Avance de costos</span><strong>68.3%</strong></div><div class="progress-bar"><div class="progress-fill" style="width:68.3%"></div></div></div>
+        </div>
+
+        <div class="panel">
+          <div class="section-title" style="margin:0 0 8px"><h2>Distribución por Centro SICT</h2><span>Datos simulados</span></div>
+          <div class="table-wrap"><table class="table">
+            <thead><tr><th>Centro</th><th>Aprobado</th><th>Ejercido</th><th>Avance</th><th>Disponible</th></tr></thead>
+            <tbody>
+              <tr><td>Jalisco</td><td>$1.85 M</td><td>$1.18 M</td><td>63.8%</td><td>$670 M</td></tr>
+              <tr><td>Nuevo León</td><td>$1.62 M</td><td>$1.01 M</td><td>62.3%</td><td>$610 M</td></tr>
+              <tr><td>Veracruz</td><td>$2.14 M</td><td>$1.23 M</td><td>57.5%</td><td>$910 M</td></tr>
+              <tr><td>Oaxaca</td><td>$1.46 M</td><td>$820 M</td><td>56.2%</td><td>$640 M</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- ESTUDIOS -->
+      <section id="page-estudios" class="page">
+        <div class="hero"><div><h1>Estudios</h1><p>Información territorial y de planeación para análisis nacional y regional.</p></div><div class="hero-meta">FUENTES<strong>Red · Habitantes · Superficie</strong></div></div>
+        <div class="section-title"><h2>Indicadores territoriales</h2><span>Datos simulados</span></div>
+        <div class="metrics">
+          <div class="metric"><div class="metric-label">RED CARRETERA</div><div class="metric-value">65,763 km</div><div class="metric-foot">con 121,712 tramos · Serie oficial 2024</div></div>
+          <div class="metric"><div class="metric-label">HABITANTES</div><div class="metric-value">129.4 M</div><div class="metric-foot">Población de referencia</div></div>
+          <div class="metric"><div class="metric-label">SUPERFICIE</div><div class="metric-value">1.96 M km²</div><div class="metric-foot">Territorio nacional</div></div>
+          <div class="metric"><div class="metric-label">KM / 1,000 HAB.</div><div class="metric-value">327.0</div><div class="metric-foot">Indicador derivado</div></div>
+        </div>
+        <div class="card-grid">
+          <div class="simple-card"><h3>Red</h3><p>Información de kilómetros de red y su distribución por Centro SICT.</p></div>
+          <div class="simple-card"><h3>Habitantes</h3><p>Población por entidad y Centro SICT para análisis de cobertura.</p></div>
+          <div class="simple-card"><h3>Superficie</h3><p>Superficie territorial en km² y métricas comparativas.</p></div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+const centers=["Aguascalientes","Baja California","Baja California Sur","Campeche","Chiapas","Chihuahua","Ciudad de México","Coahuila","Colima","Durango","Guanajuato","Guerrero","Hidalgo","Jalisco","México","Michoacán","Morelos","Nayarit","Nuevo León","Oaxaca","Puebla","Querétaro","Quintana Roo","San Luis Potosí","Sinaloa","Sonora","Tabasco","Tamaulipas","Tlaxcala","Veracruz","Yucatán","Zacatecas"];
+
+function login(){
+  const c=document.getElementById('centro').value, e=document.getElementById('correo').value, p=document.getElementById('password').value;
+  if(!c||!e||!p){alert("Para el prototipo, complete Centro SICT, correo y contraseña.");return}
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('topCentro').textContent=c;
+  document.getElementById('miniCentro').textContent='Centro SICT '+c;
+  renderCenters();
+}
+function logout(){document.getElementById('app').style.display='none';document.getElementById('loginScreen').style.display='flex'}
+function showPage(name,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const target=document.getElementById('page-'+name);
+  if(target) target.classList.add('active');
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const labels={inicio:'Inicio',normativa:'Normativa',centros:'Centros SICT',presupuesto:'Presupuesto',estudios:'Estudios',aeronautica:'Aeronáutica',infraestructura:'Infraestructura',autotransporte:'Autotransporte Federal',medicina:'Medicina Preventiva'};
+  document.getElementById('crumb').textContent=labels[name]||'Centro SICT';
+  if(name==='centros') renderCenters();
+}
+function renderCenters(filter=''){
+  const list=document.getElementById('centerList'); if(!list)return;
+  list.innerHTML='';
+  centers.filter(c=>c.toLowerCase().includes(filter.toLowerCase())).forEach((c,i)=>{
+    const div=document.createElement('div');div.className='center-item';div.onclick=()=>openCenter(c);
+    div.innerHTML=`<b>${c}</b><span>Centro SICT · Registro ${String(i+1).padStart(2,'0')}</span>`;
+    list.appendChild(div);
+  });
+}
+const CENTRO_TRANSPORTE_DATA = {"Aguascalientes":{"km_red":463,"tramos":1527,"km_por_tramo":0.3,"pct_km_nacional":0.7,"km_red_nacional":65762,"poblacion_2025":1539174,"hab_por_km_red":3324.3,"tdpa_mediano":6372,"aeropuertos":1,"aerolineas":14,"vuelos_o":5304,"pasajeros_o":478727,"carga_o_kg":190661,"rutas_o":21,"vuelos_d":5253,"pasajeros_d":473759,"pct_tramos_nacional":1.25,"tramos_nacional":121712,"tdpa_promedio":9043.56,"aforos_con_tdpa":250,"total_aforos":296},"Baja California":{"km_red":2474,"tramos":3935,"km_por_tramo":0.63,"pct_km_nacional":3.76,"km_red_nacional":65762,"poblacion_2025":4009678,"hab_por_km_red":1620.7,"tdpa_mediano":7463.5,"aeropuertos":2,"aerolineas":15,"vuelos_o":44698,"pasajeros_o":6758659,"carga_o_kg":15577128,"rutas_o":60,"vuelos_d":44740,"pasajeros_d":6934975,"pct_tramos_nacional":3.23,"tramos_nacional":121712,"tdpa_promedio":9963.887096774193,"aforos_con_tdpa":248,"total_aforos":272},"Baja California Sur":{"km_red":1503,"tramos":2468,"km_por_tramo":0.61,"pct_km_nacional":2.29,"km_red_nacional":65762,"poblacion_2025":961514,"hab_por_km_red":639.7,"tdpa_mediano":2843,"aeropuertos":4,"aerolineas":31,"vuelos_o":34204,"pasajeros_o":4416094,"carga_o_kg":3763163,"rutas_o":90,"vuelos_d":34277,"pasajeros_d":4380811,"pct_tramos_nacional":2.03,"tramos_nacional":121712,"tdpa_promedio":5636.621468926553,"aforos_con_tdpa":177,"total_aforos":205},"Campeche":{"km_red":1482,"tramos":2920,"km_por_tramo":0.51,"pct_km_nacional":2.25,"km_red_nacional":65762,"poblacion_2025":968673,"hab_por_km_red":653.6,"tdpa_mediano":5730,"aeropuertos":2,"aerolineas":5,"vuelos_o":1573,"pasajeros_o":149067,"carga_o_kg":491885,"rutas_o":5,"vuelos_d":1577,"pasajeros_d":146893,"pct_tramos_nacional":2.4,"tramos_nacional":121712,"tdpa_promedio":6027.802631578948,"aforos_con_tdpa":228,"total_aforos":252},"Coahuila de Zaragoza":{"km_red":2474,"tramos":3301,"km_por_tramo":0.75,"pct_km_nacional":3.76,"km_red_nacional":65762,"poblacion_2025":3415128,"hab_por_km_red":1380.4,"tdpa_mediano":null,"aeropuertos":3,"aerolineas":9,"vuelos_o":7782,"pasajeros_o":1098420,"carga_o_kg":635580,"rutas_o":16,"vuelos_d":7785,"pasajeros_d":1092840,"pct_tramos_nacional":2.71,"tramos_nacional":121712,"tdpa_promedio":null,"aforos_con_tdpa":null,"total_aforos":null},"Colima":{"km_red":480,"tramos":1472,"km_por_tramo":0.33,"pct_km_nacional":0.73,"km_red_nacional":65762,"poblacion_2025":762212,"hab_por_km_red":1587.9,"tdpa_mediano":6672,"aeropuertos":2,"aerolineas":20,"vuelos_o":17761,"pasajeros_o":1981140,"carga_o_kg":12997645,"rutas_o":50,"vuelos_d":17738,"pasajeros_d":2033753,"pct_tramos_nacional":1.21,"tramos_nacional":121712,"tdpa_promedio":7647.857142857143,"aforos_con_tdpa":210,"total_aforos":249},"Chiapas":{"km_red":2509,"tramos":5465,"km_por_tramo":0.46,"pct_km_nacional":3.82,"km_red_nacional":65762,"poblacion_2025":5860728,"hab_por_km_red":2335.9,"tdpa_mediano":4976,"aeropuertos":1,"aerolineas":30,"vuelos_o":148998,"pasajeros_o":21897836,"carga_o_kg":103144676,"rutas_o":109,"vuelos_d":148037,"pasajeros_d":22085706,"pct_tramos_nacional":4.49,"tramos_nacional":121712,"tdpa_promedio":6551.237373737374,"aforos_con_tdpa":396,"total_aforos":442},"Chihuahua":{"km_red":3815,"tramos":5286,"km_por_tramo":0.72,"pct_km_nacional":5.8,"km_red_nacional":65762,"poblacion_2025":3903944,"hab_por_km_red":1023.3,"tdpa_mediano":4675.5,"aeropuertos":3,"aerolineas":18,"vuelos_o":5715,"pasajeros_o":424099,"carga_o_kg":6041608,"rutas_o":39,"vuelos_d":5853,"pasajeros_d":427657,"pct_tramos_nacional":4.34,"tramos_nacional":121712,"tdpa_promedio":6341.313953488372,"aforos_con_tdpa":86,"total_aforos":99},"Ciudad de México":{"km_red":197,"tramos":465,"km_por_tramo":0.42,"pct_km_nacional":0.3,"km_red_nacional":65762,"poblacion_2025":9216407,"hab_por_km_red":46783.8,"tdpa_mediano":19816.5,"aeropuertos":2,"aerolineas":11,"vuelos_o":2160,"pasajeros_o":227434,"carga_o_kg":3195,"rutas_o":13,"vuelos_d":2158,"pasajeros_d":226498,"pct_tramos_nacional":0.38,"tramos_nacional":121712,"tdpa_promedio":24145.07142857143,"aforos_con_tdpa":84,"total_aforos":99},"Durango":{"km_red":2916,"tramos":3790,"km_por_tramo":0.77,"pct_km_nacional":4.43,"km_red_nacional":65762,"poblacion_2025":1943290,"hab_por_km_red":666.4,"tdpa_mediano":4799,"aeropuertos":1,"aerolineas":8,"vuelos_o":2521,"pasajeros_o":271840,"carga_o_kg":47170,"rutas_o":11,"vuelos_d":2527,"pasajeros_d":269430,"pct_tramos_nacional":3.11,"tramos_nacional":121712,"tdpa_promedio":5779.591397849463,"aforos_con_tdpa":93,"total_aforos":99},"Guanajuato":{"km_red":2086,"tramos":4456,"km_por_tramo":0.47,"pct_km_nacional":3.17,"km_red_nacional":65762,"poblacion_2025":6446935,"hab_por_km_red":3090.6,"tdpa_mediano":10352,"aeropuertos":2,"aerolineas":57,"vuelos_o":38122,"pasajeros_o":4206558,"carga_o_kg":99502764,"rutas_o":166,"vuelos_d":39075,"pasajeros_d":4095205,"pct_tramos_nacional":3.66,"tramos_nacional":121712,"tdpa_promedio":14501.04590818363,"aforos_con_tdpa":501,"total_aforos":566},"Guerrero":{"km_red":2626,"tramos":5309,"km_por_tramo":0.49,"pct_km_nacional":3.99,"km_red_nacional":65762,"poblacion_2025":3418902,"hab_por_km_red":1301.9,"tdpa_mediano":6438,"aeropuertos":1,"aerolineas":17,"vuelos_o":13349,"pasajeros_o":1620395,"carga_o_kg":1362507,"rutas_o":30,"vuelos_d":13209,"pasajeros_d":1602345,"pct_tramos_nacional":4.36,"tramos_nacional":121712,"tdpa_promedio":10665.21296296296,"aforos_con_tdpa":324,"total_aforos":365},"Hidalgo":{"km_red":1498,"tramos":3704,"km_por_tramo":0.4,"pct_km_nacional":2.28,"km_red_nacional":65762,"poblacion_2025":3245595,"hab_por_km_red":2166.6,"tdpa_mediano":10378,"aeropuertos":2,"aerolineas":19,"vuelos_o":5613,"pasajeros_o":674399,"carga_o_kg":206292,"rutas_o":31,"vuelos_d":5617,"pasajeros_d":677252,"pct_tramos_nacional":3.04,"tramos_nacional":121712,"tdpa_promedio":15865.14622641509,"aforos_con_tdpa":424,"total_aforos":488},"Jalisco":{"km_red":3790,"tramos":7124,"km_por_tramo":0.53,"pct_km_nacional":5.76,"km_red_nacional":65762,"poblacion_2025":8679851,"hab_por_km_red":2290.2,"tdpa_mediano":7149,"aeropuertos":0,"aerolineas":0,"vuelos_o":0,"pasajeros_o":0,"carga_o_kg":0,"rutas_o":0,"vuelos_d":0,"pasajeros_d":0,"pct_tramos_nacional":5.85,"tramos_nacional":121712,"tdpa_promedio":13141.92941176471,"aforos_con_tdpa":85,"total_aforos":99},"México":{"km_red":1821,"tramos":3933,"km_por_tramo":0.46,"pct_km_nacional":2.77,"km_red_nacional":65762,"poblacion_2025":17612480,"hab_por_km_red":9671.9,"tdpa_mediano":null,"aeropuertos":2,"aerolineas":50,"vuelos_o":87132,"pasajeros_o":12650988,"carga_o_kg":60093114,"rutas_o":156,"vuelos_d":86938,"pasajeros_d":12592998,"pct_tramos_nacional":3.23,"tramos_nacional":121712,"tdpa_promedio":null,"aforos_con_tdpa":null,"total_aforos":null},"Michoacán de Ocampo":{"km_red":3083,"tramos":5816,"km_por_tramo":0.53,"pct_km_nacional":4.69,"km_red_nacional":65762,"poblacion_2025":4889574,"hab_por_km_red":1586.0,"tdpa_mediano":null,"aeropuertos":2,"aerolineas":7,"vuelos_o":6466,"pasajeros_o":824971,"carga_o_kg":655,"rutas_o":20,"vuelos_d":6477,"pasajeros_d":816049,"pct_tramos_nacional":4.78,"tramos_nacional":121712,"tdpa_promedio":null,"aforos_con_tdpa":null,"total_aforos":null},"Morelos":{"km_red":756,"tramos":2354,"km_por_tramo":0.32,"pct_km_nacional":1.15,"km_red_nacional":65762,"poblacion_2025":1997217,"hab_por_km_red":2641.8,"tdpa_mediano":13441,"aeropuertos":0,"aerolineas":0,"vuelos_o":0,"pasajeros_o":0,"carga_o_kg":0,"rutas_o":0,"vuelos_d":0,"pasajeros_d":0,"pct_tramos_nacional":1.93,"tramos_nacional":121712,"tdpa_promedio":17126.86666666666,"aforos_con_tdpa":90,"total_aforos":99},"Nayarit":{"km_red":1497,"tramos":2336,"km_por_tramo":0.64,"pct_km_nacional":2.28,"km_red_nacional":65762,"poblacion_2025":1299075,"hab_por_km_red":867.8,"tdpa_mediano":6306,"aeropuertos":1,"aerolineas":6,"vuelos_o":941,"pasajeros_o":116769,"carga_o_kg":268,"rutas_o":7,"vuelos_d":950,"pasajeros_d":117478,"pct_tramos_nacional":1.92,"tramos_nacional":121712,"tdpa_promedio":9246.647727272728,"aforos_con_tdpa":88,"total_aforos":99},"Nuevo León":{"km_red":2761,"tramos":4284,"km_por_tramo":0.64,"pct_km_nacional":4.2,"km_red_nacional":65762,"poblacion_2025":6291899,"hab_por_km_red":2278.8,"tdpa_mediano":10064,"aeropuertos":1,"aerolineas":33,"vuelos_o":61257,"pasajeros_o":7653845,"carga_o_kg":37049478,"rutas_o":77,"vuelos_d":61090,"pasajeros_d":7707860,"pct_tramos_nacional":3.52,"tramos_nacional":121712,"tdpa_promedio":15827.43157894737,"aforos_con_tdpa":95,"total_aforos":99},"Oaxaca":{"km_red":3472,"tramos":6821,"km_por_tramo":0.51,"pct_km_nacional":5.28,"km_red_nacional":65762,"poblacion_2025":4169180,"hab_por_km_red":1200.8,"tdpa_mediano":4943,"aeropuertos":4,"aerolineas":14,"vuelos_o":13040,"pasajeros_o":1792552,"carga_o_kg":3287706,"rutas_o":34,"vuelos_d":13064,"pasajeros_d":1782630,"pct_tramos_nacional":5.6,"tramos_nacional":121712,"tdpa_promedio":6993.017928286853,"aforos_con_tdpa":502,"total_aforos":545},"Puebla":{"km_red":1758,"tramos":3997,"km_por_tramo":0.44,"pct_km_nacional":2.67,"km_red_nacional":65762,"poblacion_2025":1997217,"hab_por_km_red":1136.1,"tdpa_mediano":11015.5,"aeropuertos":1,"aerolineas":9,"vuelos_o":4392,"pasajeros_o":607396,"carga_o_kg":3134450,"rutas_o":15,"vuelos_d":4442,"pasajeros_d":610381,"pct_tramos_nacional":3.28,"tramos_nacional":121712,"tdpa_promedio":14551.76049172185,"aforos_con_tdpa":604,"total_aforos":695},"Querétaro":{"km_red":1168,"tramos":2309,"km_por_tramo":0.51,"pct_km_nacional":1.78,"km_red_nacional":65762,"poblacion_2025":2606836,"hab_por_km_red":2231.9,"tdpa_mediano":17659,"aeropuertos":1,"aerolineas":24,"vuelos_o":13837,"pasajeros_o":1187309,"carga_o_kg":47486397,"rutas_o":44,"vuelos_d":13257,"pasajeros_d":1171309,"pct_tramos_nacional":1.9,"tramos_nacional":121712,"tdpa_promedio":21375.32584269663,"aforos_con_tdpa":89,"total_aforos":99},"Quintana Roo":{"km_red":1289,"tramos":3100,"km_por_tramo":0.42,"pct_km_nacional":1.96,"km_red_nacional":65762,"poblacion_2025":2100792,"hab_por_km_red":1629.8,"tdpa_mediano":6361.5,"aeropuertos":4,"aerolineas":69,"vuelos_o":101250,"pasajeros_o":15596977,"carga_o_kg":14883745,"rutas_o":188,"vuelos_d":101353,"pasajeros_d":15480013,"pct_tramos_nacional":2.55,"tramos_nacional":121712,"tdpa_promedio":7453.576086956522,"aforos_con_tdpa":92,"total_aforos":99},"San Luis Potosí":{"km_red":2485,"tramos":3601,"km_por_tramo":0.69,"pct_km_nacional":3.78,"km_red_nacional":65762,"poblacion_2025":2889524,"hab_por_km_red":1162.8,"tdpa_mediano":6464,"aeropuertos":1,"aerolineas":18,"vuelos_o":7136,"pasajeros_o":400144,"carga_o_kg":16616551,"rutas_o":22,"vuelos_d":7084,"pasajeros_d":410164,"pct_tramos_nacional":2.96,"tramos_nacional":121712,"tdpa_promedio":9636.724852071005,"aforos_con_tdpa":338,"total_aforos":398},"Sinaloa":{"km_red":1770,"tramos":2645,"km_por_tramo":0.67,"pct_km_nacional":2.69,"km_red_nacional":65762,"poblacion_2025":3102935,"hab_por_km_red":1753.1,"tdpa_mediano":5505,"aeropuertos":3,"aerolineas":19,"vuelos_o":19298,"pasajeros_o":2275730,"carga_o_kg":16204565,"rutas_o":60,"vuelos_d":19315,"pasajeros_d":2250874,"pct_tramos_nacional":2.17,"tramos_nacional":121712,"tdpa_promedio":7374.723684210527,"aforos_con_tdpa":304,"total_aforos":324},"Sonora":{"km_red":3013,"tramos":2966,"km_por_tramo":1.02,"pct_km_nacional":4.58,"km_red_nacional":65762,"poblacion_2025":3049889,"hab_por_km_red":1012.2,"tdpa_mediano":5488,"aeropuertos":4,"aerolineas":18,"vuelos_o":12937,"pasajeros_o":1329116,"carga_o_kg":10907960,"rutas_o":33,"vuelos_d":12868,"pasajeros_d":1330667,"pct_tramos_nacional":2.44,"tramos_nacional":121712,"tdpa_promedio":6558.391304347826,"aforos_con_tdpa":253,"total_aforos":281},"Tabasco":{"km_red":1024,"tramos":2211,"km_por_tramo":0.46,"pct_km_nacional":1.56,"km_red_nacional":65762,"poblacion_2025":2527009,"hab_por_km_red":2467.8,"tdpa_mediano":5901,"aeropuertos":1,"aerolineas":9,"vuelos_o":5989,"pasajeros_o":694245,"carga_o_kg":3771090,"rutas_o":15,"vuelos_d":5995,"pasajeros_d":685507,"pct_tramos_nacional":1.82,"tramos_nacional":121712,"tdpa_promedio":7737.072555205047,"aforos_con_tdpa":317,"total_aforos":356},"Tamaulipas":{"km_red":2697,"tramos":5578,"km_por_tramo":0.48,"pct_km_nacional":4.1,"km_red_nacional":65762,"poblacion_2025":3620715,"hab_por_km_red":1342.5,"tdpa_mediano":6855,"aeropuertos":5,"aerolineas":13,"vuelos_o":6577,"pasajeros_o":640968,"carga_o_kg":447026,"rutas_o":27,"vuelos_d":6576,"pasajeros_d":669171,"pct_tramos_nacional":4.58,"tramos_nacional":121712,"tdpa_promedio":7728.5,"aforos_con_tdpa":84,"total_aforos":99},"Tlaxcala":{"km_red":770,"tramos":2638,"km_por_tramo":0.29,"pct_km_nacional":1.17,"km_red_nacional":65762,"poblacion_2025":1419482,"hab_por_km_red":1843.5,"tdpa_mediano":10827.5,"aeropuertos":0,"aerolineas":0,"vuelos_o":0,"pasajeros_o":0,"carga_o_kg":0,"rutas_o":0,"vuelos_d":0,"pasajeros_d":0,"pct_tramos_nacional":2.17,"tramos_nacional":121712,"tdpa_promedio":13088.45348837209,"aforos_con_tdpa":86,"total_aforos":99},"Veracruz de Ignacio de la Llave":{"km_red":4256,"tramos":9046,"km_por_tramo":0.47,"pct_km_nacional":6.47,"km_red_nacional":65762,"poblacion_2025":7917876,"hab_por_km_red":1860.4,"tdpa_mediano":null,"aeropuertos":3,"aerolineas":10,"vuelos_o":9072,"pasajeros_o":1003176,"carga_o_kg":239081,"rutas_o":25,"vuelos_d":9031,"pasajeros_d":997887,"pct_tramos_nacional":7.43,"tramos_nacional":121712,"tdpa_promedio":null,"aforos_con_tdpa":null,"total_aforos":null},"Yucatán":{"km_red":1798,"tramos":3258,"km_por_tramo":0.55,"pct_km_nacional":2.73,"km_red_nacional":65762,"poblacion_2025":2506448,"hab_por_km_red":1394.0,"tdpa_mediano":5932,"aeropuertos":2,"aerolineas":21,"vuelos_o":15245,"pasajeros_o":1936207,"carga_o_kg":15031436,"rutas_o":33,"vuelos_d":15176,"pasajeros_d":1957583,"pct_tramos_nacional":2.68,"tramos_nacional":121712,"tdpa_promedio":6096.815217391304,"aforos_con_tdpa":92,"total_aforos":100},"Zacatecas":{"km_red":2031,"tramos":3597,"km_por_tramo":0.56,"pct_km_nacional":3.09,"km_red_nacional":65762,"poblacion_2025":1686419,"hab_por_km_red":830.3,"tdpa_mediano":5846,"aeropuertos":2,"aerolineas":6,"vuelos_o":2026,"pasajeros_o":207960,"carga_o_kg":24354,"rutas_o":11,"vuelos_d":2016,"pasajeros_d":207609,"pct_tramos_nacional":2.96,"tramos_nacional":121712,"tdpa_promedio":8336.765060240963,"aforos_con_tdpa":332,"total_aforos":392}};
+function normalizeStateName(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');}
+function getSelectedTransportState(){
+  const normalize = value => normalizeStateName(String(value||'').replace(/^Centro SICT\s*/i,'').trim());
+  const candidates = [
+    window.currentCentroSICT,
+    document.getElementById('detailTitle')?.textContent,
+    document.getElementById('miniCentro')?.textContent,
+    document.getElementById('infraCentroTitle')?.textContent,
+    document.getElementById('aeroCentroTitle')?.textContent
+  ].filter(Boolean);
+  for(const raw of candidates){
+    const key=normalize(raw);
+    const found=Object.keys(CENTRO_TRANSPORTE_DATA).find(k=>normalize(k)===key);
+    if(found) return found;
+  }
+  return null;
+}
+function fmtTransport(v,digits=0){
+  if(v===null||v===undefined||v===''||!Number.isFinite(Number(v)))return '—';
+  return Number(v).toLocaleString('es-MX',{maximumFractionDigits:digits});
+}
+function renderTransportState(){
+  const state=getSelectedTransportState();
+  const put=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  put('infraCentroTitle',state||'Resumen nacional');
+  put('aeroCentroTitle',state||'Resumen nacional');
+
+  const records=Object.values(CENTRO_TRANSPORTE_DATA);
+  const sum=key=>records.reduce((a,d)=>a+(Number(d[key])||0),0);
+  const national={
+    km_red:65763,
+    tramos:121712,
+    km_por_tramo:65763/121712,
+    pct_km_nacional:100,
+    pct_tramos_nacional:100,
+    poblacion_2025:sum('poblacion_2025'),
+    hab_por_km_red:sum('poblacion_2025')/65763,
+    tdpa_promedio:records.filter(d=>Number.isFinite(Number(d.tdpa_promedio))).reduce((a,d)=>a+Number(d.tdpa_promedio),0)/Math.max(1,records.filter(d=>Number.isFinite(Number(d.tdpa_promedio))).length),
+    aeropuertos:sum('aeropuertos'),
+    aerolineas:sum('aerolineas'),
+    vuelos_o:sum('vuelos_o'),
+    pasajeros_o:sum('pasajeros_o'),
+    carga_o_kg:sum('carga_o_kg'),
+    rutas_o:sum('rutas_o'),
+    vuelos_d:sum('vuelos_d'),
+    pasajeros_d:sum('pasajeros_d')
+  };
+  const d=state?CENTRO_TRANSPORTE_DATA[state]:national;
+  const kmPct = state ? d.pct_km_nacional : 100;
+  const tramoPct = state ? d.pct_tramos_nacional : 100;
+
+  put('infraPctKm',fmtTransport(kmPct,2)+'%');
+  put('infraKm',fmtTransport(d.km_red));
+  put('infraKmTramo',fmtTransport(d.km_por_tramo,2)+' km');
+  put('infraTramos',fmtTransport(d.tramos));
+  put('infraPctTramos',fmtTransport(tramoPct,2)+'%');
+  put('infraHabPorKm',fmtTransport(d.hab_por_km_red,1));
+  put('infraTdpa',fmtTransport(d.tdpa_promedio ?? d.tdpa_mediano));
+  put('aeroAeropuertos',fmtTransport(d.aeropuertos));
+  put('aeroPasajerosO',fmtTransport(d.pasajeros_o));
+  put('aeroVuelosO',fmtTransport(d.vuelos_o));
+  put('aeroCargaO',fmtTransport(d.carga_o_kg)+' kg');
+  put('aeroPasajerosD',fmtTransport(d.pasajeros_d));
+  put('aeroVuelosD',fmtTransport(d.vuelos_d));
+  put('aeroRutasO',fmtTransport(d.rutas_o));
+  put('aeroAerolineas',fmtTransport(d.aerolineas));
+}
+function openArea(area){
+  const allowedAreas = ['autotransporte','medicina'];
+  if(!allowedAreas.includes(area)) return;
+  renderTransportState();
+  showPage(area);
+  setTimeout(()=>{try{renderTransportState();}catch(e){}},0);
+}
+function openInfraestructura(){renderTransportState();showPage('infraestructura');}
+function openAeronautica(){renderTransportState();showPage('aeronautica');}
+
+function openCenter(c){
+  window.currentCentroSICT = c;
+  const title=document.getElementById('detailTitle');
+  if(title) title.textContent='Centro SICT '+c;
+  const mini=document.getElementById('miniCentro');
+  if(mini) mini.textContent='Centro SICT '+c;
+  // Reset the module title and values to the selected state's record before navigation.
+  renderTransportState();
+  showPage('centro-detalle');
+  setTimeout(renderTransportState, 0);
+}
+
+const SICT_CHART_COLORS = {
+  guinda: '#611232',
+  dorado: '#A57F2C',
+  verde: '#002F2A',
+  azul: '#1565C0',
+  rojo: '#C62828',
+  gris: '#98989A'
+};
+
+let budgetChartsReady=false;
+function openFolder(name){
+  document.getElementById('normFolderView').style.display='none';
+  document.getElementById('normFolderContent').style.display='block';
+  document.getElementById('folderName').textContent=name;
+  document.getElementById('emptyTitle').textContent=name+' · carpeta vacía';
+}
+function closeFolder(){
+  document.getElementById('normFolderContent').style.display='none';
+  document.getElementById('normFolderView').style.display='block';
+}
+function renderBudgetCharts(){
+  if(budgetChartsReady || typeof Chart==='undefined') return;
+  const common={responsive:true,maintainAspectRatio:false};
+  new Chart(document.getElementById('budgetBar'),{
+    type:'bar',data:{labels:['Costos','Inversión','Operación','Otros'],
+      datasets:[
+        {label:'Aprobado',data:[9700,11800,5100,2000],backgroundColor:SICT_CHART_COLORS.guinda,borderColor:SICT_CHART_COLORS.guinda,borderWidth:1,borderRadius:4},
+        {label:'Ejercido',data:[6625,6466,3264,845],backgroundColor:SICT_CHART_COLORS.dorado,borderColor:SICT_CHART_COLORS.dorado,borderWidth:1,borderRadius:4}
+      ]},
+    options:{...common,plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}}},x:{ticks:{font:{size:10}}}}}
+  });
+  new Chart(document.getElementById('budgetDoughnut'),{
+    type:'doughnut',data:{labels:['Inversión','Costos','Operación','Otros'],datasets:[{data:[11800,9700,5100,2000],backgroundColor:[SICT_CHART_COLORS.guinda,SICT_CHART_COLORS.dorado,SICT_CHART_COLORS.verde,SICT_CHART_COLORS.gris],borderColor:'#FFFFFF',borderWidth:2}]},
+    options:{...common,cutout:'62%',plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:14}}}}
+  });
+  new Chart(document.getElementById('budgetLine'),{
+    type:'line',data:{labels:['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep'],
+      datasets:[{label:'Avance acumulado',data:[5,11,18,25,33,41,49,55,60.1],tension:.35,fill:false,borderColor:SICT_CHART_COLORS.verde,backgroundColor:'rgba(0,47,42,.08)',borderWidth:3,pointRadius:3.5,pointBackgroundColor:SICT_CHART_COLORS.verde}]},
+    options:{...common,plugins:{legend:{position:'bottom',labels:{font:{size:10}}}},scales:{y:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%',font:{size:10}}},x:{ticks:{font:{size:10}}}}}
+  });
+  budgetChartsReady=true;
+}
+const oldShowPage=showPage;
+showPage=function(name,btn){
+  oldShowPage(name,btn);
+  if(name==='presupuesto') setTimeout(renderBudgetCharts,80);
+};
+renderCenters();
+
+</script>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+let QGIS_MAP_LAYERS = {"states":{"type":"FeatureCollection","features":[]},"roads":{"type":"FeatureCollection","features":[]},"tdpa":{"type":"FeatureCollection","features":[]},"airports":{"type":"FeatureCollection","features":[]},"routes":{"type":"FeatureCollection","features":[]},"intlRoutes":{"type":"FeatureCollection","features":[]},"tramosAforos":{"type":"FeatureCollection","features":[]}};
+const QGIS_MAP_LAYER_FILES = {"states":"estados_mexico.geojson","roads":"red_vial.geojson","tdpa":"puntos_tdpa.geojson","airports":"aeropuertos.geojson","routes":"rutas_nacionales.geojson","intlRoutes":"rutas_internacionales.geojson","tramosAforos":"tramos_aforos.geojson"};
+let QGIS_MAP_LAYERS_READY = false;
+let QGIS_MAP_LAYERS_PROMISE = null;
+function loadQGISMapLayers(){
+  if(QGIS_MAP_LAYERS_READY) return Promise.resolve(QGIS_MAP_LAYERS);
+  if(QGIS_MAP_LAYERS_PROMISE) return QGIS_MAP_LAYERS_PROMISE;
+  if(location.protocol === 'file:'){
+    return Promise.reject(new Error('El tablero se abrió como archivo local. Publícalo en GitHub Pages o ejecútalo con un servidor local; los mapas externos no cargan con doble clic.'));
+  }
+  QGIS_MAP_LAYERS_PROMISE = Promise.all(Object.entries(QGIS_MAP_LAYER_FILES).map(async ([key,file])=>{
+    const assetUrl = new URL('data/'+file, document.baseURI).toString();
+    let response;
+    try { response = await fetch(assetUrl, {cache:'no-cache'}); }
+    catch(fetchError) { throw new Error('No se pudo conectar con '+assetUrl+'. Verifica que el archivo esté publicado en esa ruta. '+(fetchError?.message||'')); }
+    if(!response.ok) throw new Error('Archivo no encontrado o no publicado: '+assetUrl+' (HTTP '+response.status+')');
+    return [key, await response.json()];
+  })).then(entries=>{
+    for(const [key,data] of entries) QGIS_MAP_LAYERS[key]=data;
+    QGIS_MAP_LAYERS_READY=true;
+    return QGIS_MAP_LAYERS;
+  }).catch(error=>{QGIS_MAP_LAYERS_PROMISE=null; console.error('Error al cargar capas geográficas:',error); throw error;});
+  return QGIS_MAP_LAYERS_PROMISE;
+}
+
+let infraMapInstance=null, aeroMapInstance=null;
+function safeText(v){return (v===null||v===undefined||v===""||Number.isNaN(v))?"Sin dato":String(v);}
+function popupRows(obj, keys){return '<div style="min-width:180px"><strong>'+safeText(obj[keys[0]])+'</strong><hr style="margin:5px 0">'+keys.slice(1).map(k=>'<div><b>'+k+':</b> '+safeText(obj[k])+'</div>').join('')+'</div>';}
+function initInfraMap(){
+ if(!QGIS_MAP_LAYERS_READY){
+   loadQGISMapLayers().then(()=>{initInfraMap(); }).catch(err=>{console.error(err);const el=document.getElementById('infraMap'); if(el) el.innerHTML='<div style="padding:18px;color:#611232"><strong>No se pudieron cargar los datos geográficos.</strong><br><span style="font-size:12px">'+String(err.message||err).replace(/[<>&]/g,' ')+'</span><br><small>Abre la URL publicada de GitHub Pages (https://...github.io/...) y comprueba que la carpeta data esté junto a index.html.</small></div>';});
+   return;
+ }
+
+ if(infraMapInstance){setTimeout(()=>infraMapInstance.invalidateSize(),100);return;}
+ const map=L.map('infraMap',{preferCanvas:true,zoomControl:true,worldCopyJump:false}).setView([23.8,-102.2],5);
+ infraMapInstance=map;
+ // Base vectorial sin mosaicos externos ni marcas de agua: conserva la forma de México.
+ const states=QGIS_MAP_LAYERS.states;
+ // Fixed intervals aligned with the QGIS KM FEDERALES legend.
+ const kmBreaks=[770,1503,2086,3083,4256];
+ const kmColors=['#fbf0e9','#f5c9b8','#e99480','#cb5558','#8f263b'];
+ const kmColor=v=>v<=770?kmColors[0]:v<=1503?kmColors[1]:v<=2086?kmColors[2]:v<=3083?kmColors[3]:kmColors[4];
+ let stateLayer;
+ stateLayer=L.geoJSON(states,{style:f=>({color:'#ffffff',weight:1.2,fillColor:kmColor(Number((f.properties||{}).fed_Km_federales)||0),fillOpacity:.88}),onEachFeature:(f,l)=>{const p=f.properties||{};l.bindPopup(popupRows(p,['NOMGEO','fed_Km_federales','fed_Tramos','fed_Porcentaje']));l.on('mouseover',()=>l.setStyle({fillOpacity:1,weight:2,color:'#611232'}));l.on('mouseout',()=>stateLayer.resetStyle(l));}}).addTo(map);
+ const roads=L.geoJSON(QGIS_MAP_LAYERS.roads,{
+   style:{color:'#7b1e3a',weight:1.15,opacity:.82},
+   onEachFeature:(f,l)=>l.bindPopup(popupRows(f.properties||{},['Nombre_red','Codigo_red','Tipo_vial','Administracion','Estado']))
+ });
+ const tdpa=L.geoJSON(QGIS_MAP_LAYERS.tdpa,{pointToLayer:(f,ll)=>L.circleMarker(ll,{radius:4,fillColor:'#d97706',color:'#fff',weight:1,fillOpacity:.9}),onEachFeature:(f,l)=>l.bindPopup(popupRows(f.properties||{},['Estado','Carretera','Ruta','Punto','Km','TDPA_max','Validacion']))});
+ L.control.layers(
+  {},
+  {'Mapa de calor: km federales por estado':stateLayer,
+   'Red vial completa (red vial.gpkg)':roads,
+   'Puntos de aforo / TDPA máximo':tdpa},
+  {collapsed:false}
+ ).addTo(map);
+ const legend=L.control({position:'bottomright'});
+ legend.onAdd=function(){
+  const div=L.DomUtil.create('div','leaflet-control heat-legend-map');
+  div.innerHTML='<strong>KM FEDERALES</strong><div><i style="background:#fbf0e9"></i> 197 – 770 km</div><div><i style="background:#f5c9b8"></i> 770 – 1,503 km</div><div><i style="background:#e99480"></i> 1,503 – 2,086 km</div><div><i style="background:#cb5558"></i> 2,086 – 3,083 km</div><div><i style="background:#8f263b"></i> 3,083 – 4,256 km</div><small>Los tonos más oscuros representan una mayor longitud de red federal registrada.</small>';
+  return div;
+ };
+ legend.addTo(map);
+ try{map.fitBounds(stateLayer.getBounds().pad(.025));}catch(e){}
+ setTimeout(()=>{map.invalidateSize();try{map.fitBounds(stateLayer.getBounds().pad(.025));}catch(e){}},300);
+}
+function initAeroMap(){
+ if(!QGIS_MAP_LAYERS_READY){
+   loadQGISMapLayers().then(()=>{initAeroMap();}).catch(err=>{const el=document.getElementById('aeroMap'); if(el) el.innerHTML='<div style="padding:18px;color:#611232">No se pudieron cargar los datos geográficos. Verifica que la carpeta data esté junto a index.html y publicado en GitHub Pages.</div>';});
+   return;
+ }
+
+ if(aeroMapInstance){setTimeout(()=>aeroMapInstance.invalidateSize(),100);return;}
+ const map=L.map('aeroMap',{preferCanvas:true,zoomControl:true,worldCopyJump:false}).setView([23.8,-102.2],4);
+ aeroMapInstance=map;
+ // Fondo vectorial integrado, con opción de mapa mundial claro sin marcas de agua superpuestas.
+ const stateBase=L.geoJSON(QGIS_MAP_LAYERS.states,{style:{color:'#d8d9d2',weight:.8,fillColor:'#fbfaf5',fillOpacity:1},interactive:false}).addTo(map);
+
+ const domesticRoutes=L.layerGroup();
+ const internationalRoutes=L.layerGroup();
+ let selectedAirport=null;
+ const normalizeRouteValue=v=>String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+ const featureCollection=(fc,features)=>({type:'FeatureCollection',features});
+ function routeTouchesAirport(feature, airport){
+   const p=feature.properties||{};
+   const iata=normalizeRouteValue(airport.iata);
+   const name=normalizeRouteValue(airport.name);
+   const originIata=normalizeRouteValue(p.Origen_IATA||p.ORIGEN_IATA||p.IATA_ORIGEN||p.From_IATA||p.ORIG_IATA);
+   const destIata=normalizeRouteValue(p.Destino_IATA||p.DESTINO_IATA||p.IATA_DESTINO||p.To_IATA||p.DEST_IATA);
+   if(iata && (originIata===iata || destIata===iata)) return true;
+   const origin=normalizeRouteValue(p.Origen||p.ORIGEN||p.Origin||p.From);
+   const dest=normalizeRouteValue(p.Destino||p.DESTINO||p.Destination||p.To);
+   // Las rutas pueden venir como IATA, nombre del aeropuerto o ciudad asociada.
+   const aliases=(airport.aliases||[]).map(normalizeRouteValue).filter(Boolean);
+   const matches=(end,endIata)=>!!end && (end===name || aliases.includes(end) || (iata && end===iata) || (iata && endIata===iata) || aliases.some(a=>a.length>=3 && (end.includes(a)||a.includes(end))));
+   return matches(origin,originIata)||matches(dest,destIata);
+ }
+ function drawRoutesForAirport(airport){
+   domesticRoutes.clearLayers();
+   internationalRoutes.clearLayers();
+   if(!airport) return;
+   const national=(QGIS_MAP_LAYERS.routes.features||[]).filter(f=>routeTouchesAirport(f,airport));
+   const intl=(QGIS_MAP_LAYERS.intlRoutes.features||[]).filter(f=>routeTouchesAirport(f,airport));
+   if(national.length){
+     L.geoJSON(featureCollection(QGIS_MAP_LAYERS.routes,national),{
+       style:{color:'#83bfd3',weight:1.15,opacity:.58},
+       onEachFeature:(f,l)=>l.bindPopup(popupRows(f.properties||{},['Ruta','Origen','Destino','Registros']))
+     }).addTo(domesticRoutes);
+   }
+   if(intl.length){
+     L.geoJSON(featureCollection(QGIS_MAP_LAYERS.intlRoutes,intl),{
+       style:{color:'#b3842d',weight:2,dashArray:'5 4',opacity:.9},
+       onEachFeature:(f,l)=>l.bindPopup(popupRows(f.properties||{},['Ruta','Origen','Destino','Empresa operadora','País origen','País destino']))
+     }).addTo(internationalRoutes);
+   }
+   if(national.length) domesticRoutes.addTo(map);
+   if(intl.length) internationalRoutes.addTo(map);
+ }
+ const airports=L.geoJSON(QGIS_MAP_LAYERS.airports,{
+   pointToLayer:(f,ll)=>{
+     const p=f.properties||{};
+     const iata=String(p.IATA||p.iata||p.IATA_3||p.CVE_IATA||'').trim();
+     const icon=L.divIcon({className:'airport-aircraft-marker',html:'<div class="airport-iata-label">'+iata+'</div><div class="airport-plane-icon">✈</div>',iconSize:[26,30],iconAnchor:[13,23]});
+     return L.marker(ll,{icon,title:iata?'Aeropuerto '+iata:'Aeropuerto'});
+   },
+   onEachFeature:(f,l)=>{
+     const p=f.properties||{};
+     const airport={iata:p.IATA||p.iata||'',name:p.Aeropuerto||p.Nombre||p.name||'',aliases:[p.Aeropuerto,p.Nombre,p.name,p.Ciudad,p.Ciudad_Aeropuerto,p.Aeropuerto_Ciudad,p.IATA,p.iata,'CREEL','CSL'].filter(Boolean)};
+     l.bindPopup(popupRows(p,['Aeropuerto','IATA','Grupo Aeroportuario','Pasajeros Nacionales','Pasajeros Internacionales','Tipo Aeropuerto']));
+     l.on('click',()=>{
+       if(selectedAirport && selectedAirport.iata===airport.iata){selectedAirport=null;domesticRoutes.clearLayers();internationalRoutes.clearLayers();return;}
+       selectedAirport=airport;
+       drawRoutesForAirport(airport);
+       const national=(QGIS_MAP_LAYERS.routes.features||[]).filter(f=>routeTouchesAirport(f,airport)).length;
+       const intl=(QGIS_MAP_LAYERS.intlRoutes.features||[]).filter(f=>routeTouchesAirport(f,airport)).length;
+       l.bindPopup(popupRows(p,['Aeropuerto','IATA','Grupo Aeroportuario','Pasajeros Nacionales','Pasajeros Internacionales','Tipo Aeropuerto'])+
+         '<div style="margin-top:8px;padding-top:7px;border-top:1px solid #e5e7eb;font-size:12px"><strong>Conectividad de '+airport.iata+'</strong><br>Rutas nacionales: '+national+'<br>Rutas internacionales: '+intl+'<br><small>Selecciona otro aeropuerto para cambiar las rutas; vuelve a seleccionar este para ocultarlas.</small></div>');
+     });
+   }
+ }).addTo(map);
+ // Keep the map uncluttered at first; route lines appear only after clicking an airport.
+ L.control.layers(
+   {},
+   {'Aeropuertos nacionales':airports,
+    'Rutas aéreas nacionales':domesticRoutes,
+    'Rutas internacionales':internationalRoutes},
+   {collapsed:false}
+ ).addTo(map);
+ // Global view at first; route layers are empty until an airport is selected.
+ setTimeout(()=>{map.invalidateSize();try{map.fitBounds(stateLayer.getBounds().pad(.025));}catch(e){}},300);
+}const originalShowPageForMaps=window.showPage;
+window.showPage=function(name,btn){
+ if(typeof originalShowPageForMaps==='function') originalShowPageForMaps(name,btn);
+ const pageName=String(name||'').replace(/^page-/,'');
+ if(pageName==='infraestructura') setTimeout(()=>{try{renderTransportState();}catch(e){}},50);
+ if(pageName==='aeronautica') setTimeout(()=>{try{renderTransportState();}catch(e){}},50);
+ if(pageName==='infraestructura' && window.L) setTimeout(()=>{try{initInfraMap();}catch(e){console.error('No se pudo dibujar el mapa de infraestructura',e);}},250);
+ if(pageName==='aeronautica' && window.L) setTimeout(()=>{try{initAeroMap();}catch(e){console.error('No se pudo dibujar el mapa de aeronáutica',e);}},250);
+};
+document.addEventListener('DOMContentLoaded',()=>{
+ setTimeout(()=>{
+  if(!window.L) return;
+  if(document.getElementById('page-infraestructura')?.classList.contains('active')){try{initInfraMap();}catch(e){console.error(e);}}
+  if(document.getElementById('page-aeronautica')?.classList.contains('active')){try{initAeroMap();}catch(e){console.error(e);}}
+ },300);
+});
+</script>
+
+</body>
+</html>
